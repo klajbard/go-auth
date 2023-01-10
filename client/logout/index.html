@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/auth.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Logged out!</title>
+    <link rel="stylesheet" href="../src/index.css" />
+  </head>
+  <body>
+    <div class="status">
+      <h1>Successfully logged out!</h1>
+      <hr>
+      <span>Redirecting back to log in page...</span>
+    </div>
+    <script>
+      window.addEventListener('load', () => {
+        window.setTimeout(() => {
+          window.location.assign(window.location.origin)
+        }, 1500)
+      })
+    </script>
+  </body>
+</html>
