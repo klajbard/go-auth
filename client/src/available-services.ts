@@ -18,7 +18,7 @@ export class AvailableServices extends LitElement {
   services: Service[] = [];
 
   connectedCallback() {
-    this._fetchServices();
+    this._handleAuth();
     super.connectedCallback();
   }
 
@@ -26,7 +26,27 @@ export class AvailableServices extends LitElement {
     super.disconnectedCallback();
   }
 
+  async _handleAuth() {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth`, {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        console.log(response);
+        throw new Error(`Error! status: ${response.status}`);
+      }
+      console.log(response);
+      this._fetchServices();
+    } catch (error) {
+      window.location.replace("/");
+      console.log(error);
+    }
+  }
+
   render() {
+    if (!this.isLoaded) {
+      return ``;
+    }
     return html`
       <div class="title">
         <h1>Available services</h1>

@@ -41,7 +41,7 @@ export class LoginForm extends LitElement {
             <input type="password" name="password" required />
           </label>
           <label class="checkbox">
-            <input type="checkbox" />
+            <input type="checkbox" checked />
             <span>Remember me</span>
           </label>
           <input type="submit" value="Login" />
