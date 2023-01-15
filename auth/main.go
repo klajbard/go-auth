@@ -16,17 +16,12 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-type User struct {
-	Username string // `json:"username`
-	Password string // `json:"password`
-}
-
-func getUser(u string) (User, bool) {
-	user := User{}
+func getUser(u string) (types.User, bool) {
+	user := types.User{}
 
 	err := config.Users.Find(bson.M{"username": u}).One(&user)
 	if err != nil {
-		return User{}, false
+		return types.User{}, false
 	}
 
 	return user, true
@@ -35,15 +30,9 @@ func getUser(u string) (User, bool) {
 func main() {
 	mux := httprouter.New()
 
-	mux.GET("/", handlers.HandleStaticPage("client/dist/index.html"))
-	mux.GET("/logout", handlers.HandleStaticPage("client/dist/logout/index.html"))
-	mux.GET("/services", handlers.WithAuth(handlers.HandleStaticPage("client/dist/services/index.html")))
 	mux.POST("/login", login)
 	mux.POST("/logout", logout)
 	mux.GET("/hello", hello)
-
-	mux.ServeFiles("/assets/*filepath", http.Dir("client/dist/assets"))
-	mux.NotFound = http.HandlerFunc(handlers.NotFoundHandler)
 
 	handler := cors.New(cors.Options{
 		AllowCredentials: true,
@@ -70,7 +59,7 @@ func hello(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 }
 
 func login(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	var u User
+	var u types.User
 	var pwMatched bool
 	request := handlers.RequestHandler{R: *r, W: w}
 
@@ -113,9 +102,8 @@ func login(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 		http.SetCookie(w, cSession)
 
-		if refreshSession, ok := handlers.RefreshSessions[c.Value]; ok {
-			refreshSession.SessionToken = cSession.Value
-			handlers.RefreshSessions[c.Value] = refreshSession
+		if refreshSession, ok := handlers.GetRefreshSession(c.Value); ok && u.RememberMe {
+			refreshSession.Update(cSession.Value)
 		}
 
 		status.Message = "Successfully logged in!"
@@ -139,11 +127,15 @@ func logout(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	if cRefresh.Value != "" {
 		request.RemoveCookie("refresh_token")
-		delete(handlers.RefreshSessions, cRefresh.Value)
+		if refreshSession, ok := handlers.GetRefreshSession(cRefresh.Value); ok {
+			refreshSession.Remove()
+		}
 	}
 	if cSession.Value != "" {
 		request.RemoveCookie("session_token")
-		delete(handlers.Sessions, cSession.Value)
+		if Session, ok := handlers.GetSession(cRefresh.Value); ok {
+			Session.Remove()
+		}
 	}
 	w.WriteHeader(http.StatusAccepted)
 }

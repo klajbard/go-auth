@@ -1,7 +1,6 @@
 import { LitElement, css, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 
-
 const services = [
   {name: 'Home Assistant', url: 'http://localhost:8123'},
   {name: 'Media Server', url: 'http://localhost:8111'},
@@ -23,6 +22,13 @@ export class AvailableServices extends LitElement {
 
   render() {
     return html`
+      <div class="title">
+        <h1>Available services</h1>
+        <div class="logout">
+          <button @click=${this._logOut}>Logout</button>
+        </div>
+      </div>
+      <hr>
       <ul>
         ${services.map((service) => html`
           <li>
@@ -30,9 +36,6 @@ export class AvailableServices extends LitElement {
           </li>
         `)}
       </ul>
-      <div class="logout">
-        <button @click=${this._logOut}>Logout</button>
-      </div>
     `
   }
 
@@ -41,7 +44,6 @@ export class AvailableServices extends LitElement {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/logout`, {        method: "post",
       credentials: 'include',
     })
-
       if (!response.ok) {
         console.log(response);
         throw new Error(`Error! status: ${response.status}`);
@@ -54,9 +56,26 @@ export class AvailableServices extends LitElement {
   }
 
   static styles = css`
+    h1{
+      font-size: 2rem;
+      margin: 0;
+    }
+
+    hr {
+      width: 100%;
+    }
+
     :host {
       display: block;
       width: 100%;
+    }
+
+    .title {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: start;
     }
 
     ul {
@@ -74,8 +93,7 @@ export class AvailableServices extends LitElement {
     }
 
     button {
-      margin-top: 3rem;
-      padding: 0.5rem;
+      padding: 0.25rem 1rem;
       border: none;
       border-radius: 0.5rem;
       background: var(--purple-light);

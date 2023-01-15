@@ -36,10 +36,11 @@ func (handler *RequestHandler) CreateSessionToken(username string) *http.Cookie 
 		HttpOnly: true,
 		Path:     "/",
 	}
-	Sessions[newSessiontoken] = Session{
+	(Session{
+		Token:    newSessiontoken,
 		Username: username,
-		expiry:   expiresAt,
-	}
+		Expiry:   expiresAt,
+	}).Create()
 	return cSession
 }
 
@@ -70,9 +71,10 @@ func (handler *RequestHandler) CreateRefreshToken() *http.Cookie {
 		HttpOnly: true,
 		Path:     "/",
 	}
-	RefreshSessions[refreshSessionTokenString] = RefreshSession{
-		expiry: expiresAt,
-	}
+	(RefreshSession{
+		Token:  refreshSessionTokenString,
+		Expiry: expiresAt,
+	}).Create()
 	return cRefresh
 }
 
@@ -114,10 +116,10 @@ func (handler *RequestHandler) GetUserSession() (int, Session) {
 			cRefresh = handler.CreateRefreshToken()
 		}
 
-		refreshSession, ok := RefreshSessions[cRefresh.Value]
+		refreshSession, ok := GetRefreshSession(cRefresh.Value)
 
 		if !ok || refreshSession.isExpired() {
-			delete(RefreshSessions, cRefresh.Value)
+			refreshSession.Remove()
 			fmt.Println("unauthorized - user refresh session not found or expired")
 			cRefresh = handler.CreateRefreshToken()
 			http.SetCookie(handler.W, cRefresh)
@@ -125,7 +127,8 @@ func (handler *RequestHandler) GetUserSession() (int, Session) {
 		}
 		http.SetCookie(handler.W, cRefresh)
 
-		userSession, ok := Sessions[refreshSession.SessionToken]
+		userSession, ok := GetSession(refreshSession.SessionToken)
+		fmt.Println(ok, refreshSession.SessionToken, userSession.Token)
 
 		if !ok {
 			fmt.Println("unauthorized - user session not found for refresh token")
@@ -139,7 +142,7 @@ func (handler *RequestHandler) GetUserSession() (int, Session) {
 		cSession := handler.CreateSessionToken(userSession.Username)
 		http.SetCookie(handler.W, cSession)
 	} else {
-		userSession, ok := Sessions[c.Value]
+		userSession, ok := GetSession(c.Value)
 
 		if !ok {
 			fmt.Println("unauthorized - user session not found")
@@ -148,14 +151,8 @@ func (handler *RequestHandler) GetUserSession() (int, Session) {
 
 		if userSession.isExpired() {
 			fmt.Println("unauthorized - user session expired")
-			matchingSessionToken := false
-			delete(Sessions, c.Value)
-
-			for _, rSession := range RefreshSessions {
-				if rSession.SessionToken == c.Value {
-					matchingSessionToken = true
-				}
-			}
+			matchingSessionToken := userSession.FindRefreshSession()
+			userSession.Remove()
 
 			if !matchingSessionToken {
 				return http.StatusUnauthorized, Session{}

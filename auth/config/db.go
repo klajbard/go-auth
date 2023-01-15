@@ -10,6 +10,8 @@ import (
 
 var DB *mgo.Database
 var Users *mgo.Collection
+var Sessions *mgo.Collection
+var RefreshSessions *mgo.Collection
 
 func init() {
 
@@ -30,6 +32,8 @@ func init() {
 
 	DB = s.DB("hassio")
 	Users = DB.C("users")
+	Sessions = DB.C("sessions")
+	RefreshSessions = DB.C("refreshSessions")
 
 	log.Println("MongoDB connected")
 }
