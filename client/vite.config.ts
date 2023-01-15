@@ -9,8 +9,6 @@ const HtmlFallback = ({rootDir}: {rootDir: string}): PluginOption => ({
       if (req.originalUrl && req.originalUrl.length > 1 && !extname(req.originalUrl)) {
         if (fs.existsSync(join(rootDir, `${req.originalUrl}.html`))) {
           req.url += '.html'
-        } else {
-          console.log(req.url)
         }
       }
       next()

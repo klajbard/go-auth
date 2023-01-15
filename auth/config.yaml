@@ -1,0 +1,9 @@
+services:
+  - name: Home Assistant
+    url: http://localhost:8123
+  - name: Media Server
+    url: http://localhost:8111
+  - name: Image Storage
+    url: http://localhost:8000
+  - name: Local Server
+    url: http://localhost:3000

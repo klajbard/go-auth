@@ -99,7 +99,6 @@ func GetRefreshSession(token string) (RefreshSession, bool) {
 	refreshSession := RefreshSession{}
 
 	err := config.RefreshSessions.Find(bson.M{"token": token}).One(&refreshSession)
-	fmt.Println("asd", token, refreshSession, err != nil)
 	if err != nil {
 		return RefreshSession{}, false
 	}

@@ -21,19 +21,15 @@ Packages used:
 
 ### Endpoints
 
-- GET `/`
-  - Serves `client/dist/index.html`
-- GET `/logout`
-  - Serves `client/dist/logout/index.html`
-- GET `/services`
-  - Serves `client/dist/services/index.html`
-- GET `hello`
+- GET `/auth`
   - Creates/validates current session
-- POST `/login`
+- POST `/auth`
   - Reads `username`, `password` and `rememberMe` fields from body
   - Authenticates user, set cookies if successful
 - POST `/logout`
   - Clears refresh and session cookies
+- GET `/services`
+  - Returns with the available services configured in `config.yaml`
 
 ### Set up
 
@@ -99,14 +95,14 @@ The frontend is a multi-page app with the following pages:
 - `/`
   - Root page
   - Contains the core logic
-  - Calls `/hello` from the backend
+  - Calls `/auth` from the backend
   - Handles login by posting form data to `/login`
   - If login was successful redirects to the url recieved from the `?redirect=url` query parameter (url must be urlencoded!)
   - If login was successful and redirect query param is not present redirects to `/services`
 - `/logout`
   - Handles logged out state
   - Redirects to home page (`/`) after 3 seconds
-- `/404.html`
+- `/404`
   - Handles not found from backend
 - `/services`
   - Lists all available services configured to guard by the app
@@ -168,7 +164,7 @@ const useAuth = () => {
   const auth = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await axios(`${auth_server_url}/hello`, {
+      const response = await axios(`${auth_server_url}/auth`, {
         withCredentials: true,
       });
       setIsLoggedIn(true);

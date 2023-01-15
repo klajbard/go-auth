@@ -94,6 +94,17 @@ func (handler *RequestHandler) GetRefreshToken() (*http.Cookie, bool) {
 	return c, true
 }
 
+func (handler *RequestHandler) ValidateSession() bool {
+	c, err := handler.R.Cookie("session_token")
+
+	if err == nil {
+		userSession, ok := GetSession(c.Value)
+		return ok && !userSession.isExpired()
+	}
+
+	return false
+}
+
 func (handler *RequestHandler) GetUserSession() (int, Session) {
 	c, err := handler.R.Cookie("session_token")
 	var userSession Session
@@ -128,7 +139,6 @@ func (handler *RequestHandler) GetUserSession() (int, Session) {
 		http.SetCookie(handler.W, cRefresh)
 
 		userSession, ok := GetSession(refreshSession.SessionToken)
-		fmt.Println(ok, refreshSession.SessionToken, userSession.Token)
 
 		if !ok {
 			fmt.Println("unauthorized - user session not found for refresh token")

@@ -1,29 +1,36 @@
-import { LitElement, css, html } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
+import { LitElement, css, html } from "lit";
+import { customElement, property } from "lit/decorators.js";
 
 export interface LoginSubmit {
-  username: string
-  password: string
-  rememberMe: boolean
+  username: string;
+  password: string;
+  rememberMe: boolean;
 }
 
-@customElement('login-form')
+@customElement("login-form")
 export class LoginForm extends LitElement {
   @property()
   redirect?: string = undefined;
 
-  @property({type: String})
+  @property({ type: String })
   errorMessage: string = "";
 
   render() {
     return html`
       <div class="left">
         <h1>Welcome</h1>
-        ${this.redirect ? html`<span class="message">Authenticating for <strong>${new URL(this.redirect).hostname}</strong></span>` : ``}
+        ${this.redirect
+          ? html`<span class="message"
+              >Authenticating for
+              <strong>${new URL(this.redirect).hostname}</strong></span
+            >`
+          : ``}
       </div>
       <div class="right">
         <h1>Login</h1>
-        ${this.errorMessage ? html`<span class="error message">${this.errorMessage}</span>` : ``}
+        ${this.errorMessage
+          ? html`<span class="error message">${this.errorMessage}</span>`
+          : ``}
         <form @submit=${this._onSubmit}>
           <label>
             <span>Username</span>
@@ -40,28 +47,27 @@ export class LoginForm extends LitElement {
           <input type="submit" value="Login" />
         </form>
       </div>
-    `
+    `;
   }
 
   _onSubmit = (event: SubmitEvent) => {
     event.preventDefault();
     if (!event.currentTarget) {
-      return
+      return;
     }
-    const formElement = event.currentTarget as HTMLFormElement
-    const username = (formElement as any)[0].value
-    const password = (formElement as any)[1].value
-    const rememberMe = (formElement as any)[2].checked
+    const formElement = event.currentTarget as HTMLFormElement;
+    const username = (formElement as any)[0].value;
+    const password = (formElement as any)[1].value;
+    const rememberMe = (formElement as any)[2].checked;
 
-    const customEv = new CustomEvent('login-submit', {
+    const customEv = new CustomEvent("login-submit", {
       bubbles: true,
       composed: true,
       detail: { username, password, rememberMe },
-    })
+    });
 
-    this.dispatchEvent(customEv)
-  }
-
+    this.dispatchEvent(customEv);
+  };
 
   static styles = css`
     :host {
@@ -94,7 +100,8 @@ export class LoginForm extends LitElement {
       color: var(--blue-dark);
     }
 
-    .left, .right {
+    .left,
+    .right {
       box-sizing: border-box;
       min-width: 320px;
       padding: 2rem;
@@ -156,5 +163,5 @@ export class LoginForm extends LitElement {
     .checkbox {
       flex-direction: row;
     }
-  `
+  `;
 }

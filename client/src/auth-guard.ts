@@ -1,10 +1,10 @@
-import { LitElement, css, html } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
-import {ifDefined} from 'lit/directives/if-defined.js';
+import { LitElement, css, html } from "lit";
+import { customElement, property } from "lit/decorators.js";
+import { ifDefined } from "lit/directives/if-defined.js";
 
-import {LoginSubmit} from './login-form'
+import { LoginSubmit } from "./login-form";
 
-@customElement('auth-guard')
+@customElement("auth-guard")
 export class AuthGuard extends LitElement {
   @property({ type: Boolean })
   isAuth = false;
@@ -15,8 +15,8 @@ export class AuthGuard extends LitElement {
   @property()
   redirect?: string = undefined;
 
-  @property({type: String})
-  errorMessage: string = ""
+  @property({ type: String })
+  errorMessage: string = "";
 
   connectedCallback() {
     super.connectedCallback();
@@ -26,57 +26,61 @@ export class AuthGuard extends LitElement {
 
   render() {
     return html`
-      ${this.isLoaded ? (
-        this.isAuth ? (
-          html`
-            <success-message redirect=${ifDefined(this.redirect)}></success-message>
-          `
-        ) : (
-          html`
-            <login-form redirect=${ifDefined(this.redirect)} @login-submit=${this._onSubmit} errorMessage=${this.errorMessage}>
-            </login-form>
-          `
-        )
-      ) : "loading..."}
-    `
+      ${this.isLoaded
+        ? this.isAuth
+          ? html`
+              <success-message
+                redirect=${ifDefined(this.redirect)}
+              ></success-message>
+            `
+          : html`
+              <login-form
+                redirect=${ifDefined(this.redirect)}
+                @login-submit=${this._onSubmit}
+                errorMessage=${this.errorMessage}
+              >
+              </login-form>
+            `
+        : "loading..."}
+    `;
   }
 
   _onSubmit = (event: CustomEvent<LoginSubmit>) => {
-    const { username, password, rememberMe } = event.detail
-    this._login(username, password, rememberMe)
-  }
+    const { username, password, rememberMe } = event.detail;
+    this._login(username, password, rememberMe);
+  };
 
   _setRedirect() {
-    const params = new URLSearchParams(window.location.search)
-    this.redirect = decodeURIComponent(params.get("redirect") || "")
-    console.log(`Will redirect to ${this.redirect}`)
+    const params = new URLSearchParams(window.location.search);
+    this.redirect = decodeURIComponent(params.get("redirect") || "");
+    console.log(`Will redirect to ${this.redirect}`);
   }
 
   async _login(username: string, password: string, rememberMe: boolean) {
     this.isLoaded = false;
     this.errorMessage = "";
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/login`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth`, {
         method: "post",
-        credentials: 'include',
+        credentials: "include",
         headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          Accept: "application/json",
+          "Content-Type": "application/json",
         },
 
         body: JSON.stringify({
           username,
           password,
           rememberMe,
-        })
-      })
+        }),
+      });
       if (!response.ok) {
-        this.errorMessage = "Invalid username or password!"
+        this.errorMessage = "Invalid username or password!";
       } else {
         this.isAuth = true;
       }
     } catch (error) {
-      this.errorMessage = "Something went wrong!"
+      this.errorMessage = "Something went wrong!";
       this.isAuth = false;
     } finally {
       this.isLoaded = true;
@@ -86,12 +90,14 @@ export class AuthGuard extends LitElement {
   async _fetchState() {
     this.isLoaded = false;
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/hello`, {credentials: 'include'})
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth`, {
+        credentials: "include",
+      });
       if (!response.ok) {
         console.log(response);
         throw new Error(`Error! status: ${response.status}`);
       }
-      console.log(response)
+      console.log(response);
       this.isAuth = true;
     } catch (error) {
       this.isAuth = false;
@@ -101,9 +107,9 @@ export class AuthGuard extends LitElement {
   }
 
   static styles = css`
-  :host {
-    margin: auto;
-    display: flex;
-  }
-  `
+    :host {
+      margin: auto;
+      display: flex;
+    }
+  `;
 }

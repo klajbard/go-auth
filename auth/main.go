@@ -28,20 +28,39 @@ func getUser(u string) (types.User, bool) {
 }
 
 func main() {
+	whiteListUrls := []string{os.Getenv("CLIENT_DEV_URL")}
+	config.Conf.GetConf()
 	mux := httprouter.New()
 
-	mux.POST("/login", login)
+	mux.GET("/services", services)
+	mux.GET("/auth", auth)
+	mux.POST("/auth", login)
 	mux.POST("/logout", logout)
-	mux.GET("/hello", hello)
+
+	for _, v := range config.Conf.Services {
+		whiteListUrls = append(whiteListUrls, v.URL)
+	}
 
 	handler := cors.New(cors.Options{
 		AllowCredentials: true,
-		AllowedOrigins:   []string{os.Getenv("CLIENT_DEV_URL")},
+		AllowedOrigins:   whiteListUrls,
 	}).Handler(mux)
 	http.ListenAndServe(":8080", handler)
 }
 
-func hello(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func services(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	request := handlers.RequestHandler{R: *r, W: w}
+	isValidSession := request.ValidateSession()
+
+	if isValidSession {
+		json.NewEncoder(w).Encode(&config.Conf.Services)
+	} else {
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(&types.Status{Message: "Unauthorized"})
+	}
+}
+
+func auth(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	request := handlers.RequestHandler{R: *r, W: w}
 	status, userSession := request.GetUserSession()
 	statusMessage := types.Status{}

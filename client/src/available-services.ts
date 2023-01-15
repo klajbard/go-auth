@@ -1,18 +1,24 @@
-import { LitElement, css, html } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
+import { LitElement, css, html } from "lit";
+import { customElement, property } from "lit/decorators.js";
 
-const services = [
-  {name: 'Home Assistant', url: 'http://localhost:8123'},
-  {name: 'Media Server', url: 'http://localhost:8111'},
-  {name: 'Image Storage', url: 'http://localhost:8000'},
-]
+interface Service {
+  Name: string;
+  URL: string;
+}
 
-@customElement('available-services')
+@customElement("available-services")
 export class AvailableServices extends LitElement {
+  @property({ type: Boolean })
+  isLoaded = false;
+
   @property()
   redirect?: string = undefined;
 
+  @property()
+  services: Service[] = [];
+
   connectedCallback() {
+    this._fetchServices();
     super.connectedCallback();
   }
 
@@ -28,35 +34,59 @@ export class AvailableServices extends LitElement {
           <button @click=${this._logOut}>Logout</button>
         </div>
       </div>
-      <hr>
-      <ul>
-        ${services.map((service) => html`
-          <li>
-            <a href=${service.url}>${service.name}</a>
-          </li>
-        `)}
-      </ul>
-    `
+      <hr />
+      ${this.services.length
+        ? html`<ul>
+            ${this.services.map(
+              (service) => html`
+                <li>
+                  <a href=${service.URL}>${service.Name}</a>
+                </li>
+              `
+            )}
+          </ul> `
+        : ``}
+    `;
   }
 
-  async _logOut() {
+  async _fetchServices() {
+    this.isLoaded = false;
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/logout`, {        method: "post",
-      credentials: 'include',
-    })
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/services`,
+        { credentials: "include" }
+      );
       if (!response.ok) {
         console.log(response);
         throw new Error(`Error! status: ${response.status}`);
       }
-      console.log(response)
-      window.location.assign('/logout');
+      this.services = await response.json();
     } catch (error) {
-      console.error("Something went wrong", error)
+      console.log(error);
+    } finally {
+      this.isLoaded = true;
+    }
+  }
+
+  async _logOut() {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/logout`,
+        { method: "post", credentials: "include" }
+      );
+      if (!response.ok) {
+        console.log(response);
+        throw new Error(`Error! status: ${response.status}`);
+      }
+      console.log(response);
+      window.location.assign("/logout");
+    } catch (error) {
+      console.error("Something went wrong", error);
     }
   }
 
   static styles = css`
-    h1{
+    h1 {
       font-size: 2rem;
       margin: 0;
     }
@@ -102,5 +132,5 @@ export class AvailableServices extends LitElement {
       font-size: 1.2rem;
       cursor: pointer;
     }
-    `
+  `;
 }

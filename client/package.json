@@ -7,7 +7,10 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build --base=./",
-    "lint": "eslint src/**/*.ts"
+    "lint": "eslint src/**/*.ts",
+    "prettier": "yarn prettier:ts && yarn prettier:html",
+    "prettier:ts": "prettier --write --check 'src/**/*.ts'",
+    "prettier:html": "prettier --write *.html"
   },
   "dependencies": {
     "lit": "^2.4.1"
@@ -19,6 +22,7 @@
     "eslint": "^8.31.0",
     "eslint-plugin-lit": "^1.8.0",
     "eslint-plugin-wc": "^1.4.0",
+    "prettier": "^2.8.3",
     "typescript": "^4.9.3",
     "vite": "^4.0.0"
   }

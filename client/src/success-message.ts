@@ -1,7 +1,7 @@
-import { LitElement, css, html } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
+import { LitElement, css, html } from "lit";
+import { customElement, property } from "lit/decorators.js";
 
-@customElement('success-message')
+@customElement("success-message")
 export class SuccessMessage extends LitElement {
   @property()
   redirect?: string = undefined;
@@ -12,8 +12,8 @@ export class SuccessMessage extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     this.timeout = window.setTimeout(() => {
-      window.location.assign(this.redirect || "/services")
-    }, 1500)
+      window.location.assign(this.redirect || "/services");
+    }, 1500);
   }
 
   disconnectedCallback() {
@@ -26,17 +26,17 @@ export class SuccessMessage extends LitElement {
 
   render() {
     return html`
-        <h1>Successfully logged in!</h1>
-        <hr>
-        <span>
-          Redirecting to
-            ${this.redirect ? html`
+      <h1>Successfully logged in!</h1>
+      <hr />
+      <span>
+        Redirecting to
+        ${this.redirect
+          ? html`
               <a href=${this.redirect}>${new URL(this.redirect).hostname}</a>
-            `: html`
-              <a href="/services">Services</a>
-            `}...
-        </span>
-    `
+            `
+          : html` <a href="/services">Services</a> `}...
+      </span>
+    `;
   }
 
   static styles = css`
@@ -76,5 +76,5 @@ export class SuccessMessage extends LitElement {
       color: white;
       font-weight: bold;
     }
-  `
+  `;
 }
