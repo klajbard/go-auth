@@ -30,6 +30,12 @@
 
 @font-face {
   font-family: Poppins;
+  src: url(./assets/Poppins-Regular.ttf);
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: Poppins;
   src: url(./assets/Poppins-ExtraLight.ttf);
 }
 

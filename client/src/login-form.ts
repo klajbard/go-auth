@@ -18,9 +18,14 @@ export class LoginForm extends LitElement {
   render() {
     return html`
       <div class="left">
-        <h1>Welcome</h1>
+        <h1>Welcome back!</h1>
+        <div class="message">
+          We're glad to see you again. To continue, please sign in with your
+          account details. If you need assistance, don't hesitate to reach out
+          to us.
+        </div>
         ${this.redirect
-          ? html`<span class="message"
+          ? html`<span
               >Authenticating for
               <strong>${new URL(this.redirect).hostname}</strong></span
             >`
@@ -86,9 +91,16 @@ export class LoginForm extends LitElement {
       }
     }
 
+    .message {
+      flex-grow: 1;
+    }
+
     .left {
+      display: flex;
+      flex-direction: column;
       color: var(--white);
       background-color: var(--blue-light);
+      font-weight: 500;
     }
 
     .right {

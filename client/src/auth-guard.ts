@@ -110,6 +110,7 @@ export class AuthGuard extends LitElement {
     :host {
       margin: auto;
       display: flex;
+      max-width: 50rem;
     }
   `;
 }
